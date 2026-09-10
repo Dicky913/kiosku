@@ -39,12 +39,13 @@ export function Modal({ open, onClose, title, children, className }: ModalProps)
       />
 
       {/* Content */}
-      <div
+        <div
         className={cn(
-          "relative z-10 w-full max-w-md rounded-xl bg-white p-6 shadow-xl",
-          className
+            "relative z-10 w-full max-w-md rounded-xl bg-white p-5 shadow-xl sm:p-6",
+            "max-h-[90vh] overflow-y-auto",
+            className
         )}
-      >
+        >
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-lg font-semibold text-neutral-900">{title}</h2>
           <button
