@@ -99,8 +99,8 @@ export function ProductTable({
                   Rp {product.price.toLocaleString("id-ID")}
                 </p>
                 <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs text-neutral-500">
-                  <span>Stok: {product.stock}</span>
-                  {product.barcode && <span>{product.barcode}</span>}
+                  <span>Per {product.stock} Produk</span>
+                  {product.barcode && <span>Barcode : {product.barcode}</span>}
                 </div>
               </div>
 
@@ -109,13 +109,13 @@ export function ProductTable({
                   onClick={() => onEdit(product)}
                   className="rounded-lg p-2.5 text-neutral-500 hover:bg-neutral-100"
                 >
-                  <Pencil size={18} />
+                  <Pencil size={18} color="blue" />
                 </button>
                 <button
                   onClick={() => onDelete(product)}
                   className="rounded-lg p-2.5 text-neutral-500 hover:bg-danger-soft hover:text-danger"
                 >
-                  <Trash2 size={18} />
+                  <Trash2 size={18} color = "red" />
                 </button>
               </div>
             </div>

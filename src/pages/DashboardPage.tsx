@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { toast } from "sonner";
+import { formatLastUpdated } from "@/lib/formatDate";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { ProductTable } from "@/features/products/components/ProductTable";
 import { ProductFormModal } from "@/features/products/components/ProductFormModal";
@@ -23,6 +24,8 @@ const showToast = {
     toast.info(title, { description }),
 };
 
+
+
 export default function DashboardPage() {
   const [search, setSearch] = useState("");
   const [formOpen, setFormOpen] = useState(false);
@@ -37,6 +40,8 @@ export default function DashboardPage() {
   const deleteMutation = useDeleteProduct();
 
   useRealtimeProducts();
+
+
 
   const { handleBarcode } = useBarcodeHandler({
 // Saat produk ditemukan
@@ -72,6 +77,18 @@ onProductNotFound: (barcode) => {
     setPrefillBarcode(null);
     setFormOpen(true);
   };
+
+  const lastUpdated = useMemo(() => {
+  if (!products.length) return null;
+
+  // Ambil updated_at paling baru
+  return products.reduce((latest, product) => {
+    if (!latest) return product.updated_at;
+    return new Date(product.updated_at) > new Date(latest)
+      ? product.updated_at
+      : latest;
+  }, products[0].updated_at as string);
+}, [products]);
 
   const handleEdit = (product: Product) => {
     setSelectedProduct(product);
@@ -124,9 +141,10 @@ onProductNotFound: (barcode) => {
           <h2 className="text-lg font-semibold text-neutral-900">
             Daftar Produk
           </h2>
-          <p className="text-sm text-neutral-500">
-            {filteredProducts.length} produk ditemukan
-          </p>
+          <p className="mt-1 text-sm text-neutral-700">
+             Terakhir diperbaharui : {formatLastUpdated(lastUpdated)}
+        </p>
+
         </div>
 
         <ProductTable
