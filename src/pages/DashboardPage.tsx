@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { toast } from "sonner";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { ProductTable } from "@/features/products/components/ProductTable";
 import { ProductFormModal } from "@/features/products/components/ProductFormModal";
@@ -14,6 +15,13 @@ import { useRealtimeProducts } from "@/features/products/useRealtimeProducts";
 import { useBarcodeHandler } from "@/features/products/useBarcodeHandler";
 import type { Product } from "@/types";
 import type { ProductFormValues } from "@/features/products/validations";
+
+const showToast = {
+  success: (title: string, description?: string) =>
+    toast.success(title, { description }),
+  info: (title: string, description?: string) =>
+    toast.info(title, { description }),
+};
 
 export default function DashboardPage() {
   const [search, setSearch] = useState("");
@@ -31,17 +39,22 @@ export default function DashboardPage() {
   useRealtimeProducts();
 
   const { handleBarcode } = useBarcodeHandler({
-    onProductFound: (product) => {
-      setScannerOpen(false);
-      setSelectedProduct(product);
-      setFormOpen(true); // langsung buka form edit
-    },
-    onProductNotFound: (barcode) => {
-      setScannerOpen(false);
-      setSelectedProduct(null);
-      setPrefillBarcode(barcode);
-      setFormOpen(true); // buka form tambah dengan barcode terisi
-    },
+// Saat produk ditemukan
+onProductFound: (product) => {
+  setScannerOpen(false);
+  setSelectedProduct(product);
+  setFormOpen(true);
+  showToast.success("Produk ditemukan", product.name);
+},
+
+// Saat produk tidak ditemukan
+onProductNotFound: (barcode) => {
+  setScannerOpen(false);
+  setSelectedProduct(null);
+  setPrefillBarcode(barcode);
+  setFormOpen(true);
+  showToast.info("Produk belum terdaftar", "Silakan lengkapi data produk baru");
+},
   });
 
   const filteredProducts = useMemo(() => {
@@ -105,7 +118,6 @@ export default function DashboardPage() {
       title="Home Dashboard"
       onAddProduct={handleAdd}
       onSearch={setSearch}
-      onScanBarcode={() => setScannerOpen(true)}  // pastikan Header support prop ini
     >
       <div className="rounded-xl border border-neutral-200 bg-white shadow-sm">
         <div className="border-b border-neutral-200 px-6 py-4">
