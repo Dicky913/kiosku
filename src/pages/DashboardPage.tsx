@@ -11,6 +11,7 @@ import {
 } from "@/features/products/hooks";
 import type { Product } from "@/types";
 import type { ProductFormValues } from "@/features/products/validations";
+import { useRealtimeProducts } from "@/features/products/useRealtimeProducts";
 
 export default function DashboardPage() {
   const [search, setSearch] = useState("");
@@ -22,6 +23,7 @@ export default function DashboardPage() {
   const createMutation = useCreateProduct();
   const updateMutation = useUpdateProduct();
   const deleteMutation = useDeleteProduct();
+  useRealtimeProducts();
 
   const filteredProducts = useMemo(() => {
     if (!search.trim()) return products;
