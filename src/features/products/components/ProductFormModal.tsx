@@ -13,6 +13,7 @@ interface ProductFormModalProps {
   onSubmit: (values: ProductFormValues) => Promise<void>;
   initialData?: Product | null;
   loading?: boolean;
+  prefillBarcode?: string | null;
 }
 
 export function ProductFormModal({
@@ -21,6 +22,7 @@ export function ProductFormModal({
   onSubmit,
   initialData,
   loading = false,
+  prefillBarcode,
 }: ProductFormModalProps) {
   const isEdit = Boolean(initialData);
 
@@ -39,25 +41,25 @@ export function ProductFormModal({
     },
   });
 
-  useEffect(() => {
-    if (open) {
-      if (initialData) {
-        reset({
-          name: initialData.name,
-          barcode: initialData.barcode || "",
-          price: initialData.price,
-          stock: initialData.stock,
-        });
-      } else {
-        reset({
-          name: "",
-          barcode: "",
-          price: 0,
-          stock: 0,
-        });
-      }
+useEffect(() => {
+  if (open) {
+    if (initialData) {
+      reset({
+        name: initialData.name,
+        barcode: initialData.barcode || "",
+        price: initialData.price,
+        stock: initialData.stock,
+      });
+    } else {
+      reset({
+        name: "",
+        barcode: prefillBarcode || "",
+        price: 0,
+        stock: 0,
+      });
     }
-  }, [open, initialData, reset]);
+  }
+}, [open, initialData, prefillBarcode, reset]);
 
   const handleFormSubmit = async (values: ProductFormValues) => {
     await onSubmit({

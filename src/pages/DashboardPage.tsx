@@ -3,27 +3,46 @@ import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { ProductTable } from "@/features/products/components/ProductTable";
 import { ProductFormModal } from "@/features/products/components/ProductFormModal";
 import { DeleteProductModal } from "@/features/products/components/DeleteProductModal";
+import { BarcodeScanner } from "@/features/products/components/BarcodeScanner";
 import {
   useProducts,
   useCreateProduct,
   useUpdateProduct,
   useDeleteProduct,
 } from "@/features/products/hooks";
+import { useRealtimeProducts } from "@/features/products/useRealtimeProducts";
+import { useBarcodeHandler } from "@/features/products/useBarcodeHandler";
 import type { Product } from "@/types";
 import type { ProductFormValues } from "@/features/products/validations";
-import { useRealtimeProducts } from "@/features/products/useRealtimeProducts";
 
 export default function DashboardPage() {
   const [search, setSearch] = useState("");
   const [formOpen, setFormOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [scannerOpen, setScannerOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [prefillBarcode, setPrefillBarcode] = useState<string | null>(null);
 
   const { data: products = [], isLoading } = useProducts();
   const createMutation = useCreateProduct();
   const updateMutation = useUpdateProduct();
   const deleteMutation = useDeleteProduct();
+
   useRealtimeProducts();
+
+  const { handleBarcode } = useBarcodeHandler({
+    onProductFound: (product) => {
+      setScannerOpen(false);
+      setSelectedProduct(product);
+      setFormOpen(true); // langsung buka form edit
+    },
+    onProductNotFound: (barcode) => {
+      setScannerOpen(false);
+      setSelectedProduct(null);
+      setPrefillBarcode(barcode);
+      setFormOpen(true); // buka form tambah dengan barcode terisi
+    },
+  });
 
   const filteredProducts = useMemo(() => {
     if (!search.trim()) return products;
@@ -37,11 +56,13 @@ export default function DashboardPage() {
 
   const handleAdd = () => {
     setSelectedProduct(null);
+    setPrefillBarcode(null);
     setFormOpen(true);
   };
 
   const handleEdit = (product: Product) => {
     setSelectedProduct(product);
+    setPrefillBarcode(null);
     setFormOpen(true);
   };
 
@@ -69,6 +90,7 @@ export default function DashboardPage() {
 
     setFormOpen(false);
     setSelectedProduct(null);
+    setPrefillBarcode(null);
   };
 
   const handleDeleteConfirm = async () => {
@@ -83,6 +105,7 @@ export default function DashboardPage() {
       title="Home Dashboard"
       onAddProduct={handleAdd}
       onSearch={setSearch}
+      onScanBarcode={() => setScannerOpen(true)}  // pastikan Header support prop ini
     >
       <div className="rounded-xl border border-neutral-200 bg-white shadow-sm">
         <div className="border-b border-neutral-200 px-6 py-4">
@@ -102,19 +125,21 @@ export default function DashboardPage() {
         />
       </div>
 
-      {/* Modal Tambah / Ubah */}
+      {/* Form Modal */}
       <ProductFormModal
         open={formOpen}
         onClose={() => {
           setFormOpen(false);
           setSelectedProduct(null);
+          setPrefillBarcode(null);
         }}
         onSubmit={handleFormSubmit}
         initialData={selectedProduct}
+        prefillBarcode={prefillBarcode}
         loading={createMutation.isPending || updateMutation.isPending}
       />
 
-      {/* Modal Hapus */}
+      {/* Delete Modal */}
       <DeleteProductModal
         open={deleteOpen}
         onClose={() => {
@@ -124,6 +149,16 @@ export default function DashboardPage() {
         onConfirm={handleDeleteConfirm}
         product={selectedProduct}
         loading={deleteMutation.isPending}
+      />
+
+      {/* Barcode Scanner */}
+      <BarcodeScanner
+        open={scannerOpen}
+        onClose={() => setScannerOpen(false)}
+        onScanSuccess={handleBarcode}
+        onManualSearch={() => {
+          setScannerOpen(false);
+        }}
       />
     </DashboardLayout>
   );

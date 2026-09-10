@@ -5,12 +5,14 @@ interface HeaderProps {
   title?: string;
   onAddProduct?: () => void;
   onSearch?: (value: string) => void;
+  onScanBarcode?: () => void;
 }
 
 export function Header({
   title = "Home Dashboard",
   onAddProduct,
   onSearch,
+  onScanBarcode,
 }: HeaderProps) {
   return (
     <header className="sticky top-0 z-10 border-b border-neutral-200 bg-white">
@@ -18,12 +20,7 @@ export function Header({
         <h1 className="text-xl font-semibold text-neutral-900">{title}</h1>
 
         <div className="flex flex-1 items-center justify-end gap-3">
-          {/* Search */}
           <div className="relative w-full max-w-md">
-            <Search
-              size={18}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400"
-            />
             <input
               type="text"
               placeholder="Cari Produk..."
@@ -32,19 +29,17 @@ export function Header({
             />
           </div>
 
-          {/* Barcode button (placeholder) */}
           <button
             type="button"
+            onClick={onScanBarcode}
             className="flex h-10 w-10 items-center justify-center rounded-lg border border-neutral-300 text-neutral-600 transition hover:bg-neutral-100"
             title="Scan Barcode"
           >
-            <ScanBarcode size={20} />
+            {/* pakai icon ScanBarcode dari lucide */}
+            <span className="text-lg">▦</span>
           </button>
 
-          {/* Add Product */}
-          <Button onClick={onAddProduct}>
-            + Tambah Produk
-          </Button>
+          <Button onClick={onAddProduct}>+ Tambah Produk</Button>
         </div>
       </div>
     </header>
