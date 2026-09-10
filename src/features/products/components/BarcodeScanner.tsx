@@ -55,8 +55,16 @@ export function BarcodeScanner({
       } catch (err: unknown) {
         if (!isMounted) return;
         console.error(err);
+
+        const errorMessage =
+          err instanceof Error
+            ? err.message
+            : typeof err === "object" && err && "message" in err
+              ? String((err as { message?: unknown }).message ?? "")
+              : "";
+
         setError(
-          err?.message?.includes("Permission")
+          errorMessage.includes("Permission")
             ? "Izin kamera ditolak. Silakan izinkan akses kamera."
             : "Gagal mengakses kamera. Coba lagi atau gunakan pencarian manual."
         );
@@ -76,7 +84,7 @@ export function BarcodeScanner({
         ) {
           scannerRef.current.stop().catch(() => {});
         }
-        scannerRef.current.clear().catch(() => {});
+        scannerRef.current.clear();
         scannerRef.current = null;
       }
     };

@@ -24,6 +24,18 @@
   /* Font */
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
 }
+/* Sonner custom (opsional) */
+[data-sonner-toaster] {
+  font-family: inherit;
+}
+
+[data-sonner-toast][data-type="success"] {
+  border-color: #16a34a;
+}
+
+[data-sonner-toast][data-type="error"] {
+  border-color: #dc2626;
+}
 
 /* Base styles */
 @layer base {
