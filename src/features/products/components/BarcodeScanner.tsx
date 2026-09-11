@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Html5Qrcode, Html5QrcodeScannerState } from "html5-qrcode";
 import { X, Search } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import { cn } from "@/lib/utils";
+
 
 interface BarcodeScannerProps {
   open: boolean;
@@ -18,8 +18,7 @@ export function BarcodeScanner({
   onManualSearch,
 }: BarcodeScannerProps) {
   const scannerRef = useRef<Html5Qrcode | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [scanning, setScanning] = useState(false);
+    const [error, setError] = useState<string | null>(null);
   const containerId = "barcode-scanner-region";
 
   useEffect(() => {
@@ -32,7 +31,7 @@ export function BarcodeScanner({
     const startScanner = async () => {
       try {
         setError(null);
-        setScanning(true);
+       
 
         await scanner.start(
           { facingMode: "environment" }, // kamera belakang
@@ -68,7 +67,7 @@ export function BarcodeScanner({
             ? "Izin kamera ditolak. Silakan izinkan akses kamera."
             : "Gagal mengakses kamera. Coba lagi atau gunakan pencarian manual."
         );
-        setScanning(false);
+        // setScanning(false);
       }
     };
 

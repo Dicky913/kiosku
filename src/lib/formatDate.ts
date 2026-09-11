@@ -12,7 +12,6 @@ export function formatLastUpdated(dateString?: string | null): string {
 
   const hour = date.getHours();
   const minute = date.getMinutes().toString().padStart(2, "0");
-  const period = hour >= 12 ? "siang" : "pagi";
 
   // Sederhana: 12+ = siang, bisa kamu sesuaikan (sore/malam)
   if (hour >= 15) {

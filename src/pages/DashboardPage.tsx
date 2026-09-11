@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { toast } from "sonner";
 import { formatLastUpdated } from "@/lib/formatDate";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
@@ -96,10 +96,7 @@ export default function DashboardPage() {
     }, products[0].updated_at as string);
   }, [products]);
 
-  const handleSearch = (value: string) => {
-    setSearch(value);
-    setCurrentPage(1);
-  };
+
 
   const handleAdd = () => {
     setSelectedProduct(null);
