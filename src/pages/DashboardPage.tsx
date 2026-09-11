@@ -1,10 +1,12 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { toast } from "sonner";
+import { formatLastUpdated } from "@/lib/formatDate";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { ProductTable } from "@/features/products/components/ProductTable";
 import { ProductFormModal } from "@/features/products/components/ProductFormModal";
 import { DeleteProductModal } from "@/features/products/components/DeleteProductModal";
 import { BarcodeScanner } from "@/features/products/components/BarcodeScanner";
+import { Pagination } from "@/components/ui/Pagination";
 import {
   useProducts,
   useCreateProduct,
@@ -16,6 +18,8 @@ import { useBarcodeHandler } from "@/features/products/useBarcodeHandler";
 import type { Product } from "@/types";
 import type { ProductFormValues } from "@/features/products/validations";
 
+const ITEMS_PER_PAGE = 10;
+
 const showToast = {
   success: (title: string, description?: string) =>
     toast.success(title, { description }),
@@ -25,6 +29,7 @@ const showToast = {
 
 export default function DashboardPage() {
   const [search, setSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
   const [formOpen, setFormOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [scannerOpen, setScannerOpen] = useState(false);
@@ -39,26 +44,28 @@ export default function DashboardPage() {
   useRealtimeProducts();
 
   const { handleBarcode } = useBarcodeHandler({
-// Saat produk ditemukan
-onProductFound: (product) => {
-  setScannerOpen(false);
-  setSelectedProduct(product);
-  setFormOpen(true);
-  showToast.success("Produk ditemukan", product.name);
-},
-
-// Saat produk tidak ditemukan
-onProductNotFound: (barcode) => {
-  setScannerOpen(false);
-  setSelectedProduct(null);
-  setPrefillBarcode(barcode);
-  setFormOpen(true);
-  showToast.info("Produk belum terdaftar", "Silakan lengkapi data produk baru");
-},
+    onProductFound: (product) => {
+      setScannerOpen(false);
+      setSelectedProduct(product);
+      setFormOpen(true);
+      showToast.success("Produk ditemukan", product.name);
+    },
+    onProductNotFound: (barcode) => {
+      setScannerOpen(false);
+      setSelectedProduct(null);
+      setPrefillBarcode(barcode);
+      setFormOpen(true);
+      showToast.info(
+        "Produk belum terdaftar",
+        "Silakan lengkapi data produk baru"
+      );
+    },
   });
 
+  // Filter berdasarkan search
   const filteredProducts = useMemo(() => {
     if (!search.trim()) return products;
+
     const q = search.toLowerCase();
     return products.filter(
       (p) =>
@@ -66,6 +73,33 @@ onProductNotFound: (barcode) => {
         p.barcode?.toLowerCase().includes(q)
     );
   }, [products, search]);
+
+  // Hitung total halaman
+  const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE) || 1;
+  const safeCurrentPage = Math.min(currentPage, totalPages);
+
+  // Potong data sesuai halaman aktif
+  const paginatedProducts = useMemo(() => {
+    const start = (safeCurrentPage - 1) * ITEMS_PER_PAGE;
+    return filteredProducts.slice(start, start + ITEMS_PER_PAGE);
+  }, [filteredProducts, safeCurrentPage]);
+
+  // Waktu update terakhir
+  const lastUpdated = useMemo(() => {
+    if (!products.length) return null;
+
+    return products.reduce((latest, product) => {
+      if (!latest) return product.updated_at;
+      return new Date(product.updated_at) > new Date(latest)
+        ? product.updated_at
+        : latest;
+    }, products[0].updated_at as string);
+  }, [products]);
+
+  const handleSearch = (value: string) => {
+    setSearch(value);
+    setCurrentPage(1);
+  };
 
   const handleAdd = () => {
     setSelectedProduct(null);
@@ -108,6 +142,7 @@ onProductNotFound: (barcode) => {
 
   const handleDeleteConfirm = async () => {
     if (!selectedProduct) return;
+
     await deleteMutation.mutateAsync(selectedProduct.id);
     setDeleteOpen(false);
     setSelectedProduct(null);
@@ -118,26 +153,36 @@ onProductNotFound: (barcode) => {
       title="Home Dashboard"
       onAddProduct={handleAdd}
       onSearch={setSearch}
+      onScanBarcode={() => setScannerOpen(true)}
     >
       <div className="rounded-xl border border-neutral-200 bg-white shadow-sm">
-        <div className="border-b border-neutral-200 px-6 py-4">
+        {/* Header list */}
+        <div className="border-b border-neutral-200 px-4 py-4 sm:px-6">
           <h2 className="text-lg font-semibold text-neutral-900">
             Daftar Produk
           </h2>
-          <p className="text-sm text-neutral-500">
-            {filteredProducts.length} produk ditemukan
+          <p className="mt-1 text-sm text-neutral-600">
+            Terakhir diperbaharui : {formatLastUpdated(lastUpdated)}
           </p>
         </div>
 
+        {/* Table / Card list */}
         <ProductTable
-          products={filteredProducts}
+          products={paginatedProducts}
           onEdit={handleEdit}
           onDelete={handleDeleteClick}
           loading={isLoading}
         />
+
+        {/* Pagination */}
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+        />
       </div>
 
-      {/* Form Modal */}
+      {/* Modal Tambah / Ubah */}
       <ProductFormModal
         open={formOpen}
         onClose={() => {
@@ -151,7 +196,7 @@ onProductNotFound: (barcode) => {
         loading={createMutation.isPending || updateMutation.isPending}
       />
 
-      {/* Delete Modal */}
+      {/* Modal Hapus */}
       <DeleteProductModal
         open={deleteOpen}
         onClose={() => {
@@ -163,14 +208,12 @@ onProductNotFound: (barcode) => {
         loading={deleteMutation.isPending}
       />
 
-      {/* Barcode Scanner */}
+      {/* Scanner */}
       <BarcodeScanner
         open={scannerOpen}
         onClose={() => setScannerOpen(false)}
         onScanSuccess={handleBarcode}
-        onManualSearch={() => {
-          setScannerOpen(false);
-        }}
+        onManualSearch={() => setScannerOpen(false)}
       />
     </DashboardLayout>
   );

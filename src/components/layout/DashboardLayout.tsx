@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { type ReactNode, useState } from "react";
 import { Sidebar } from "./Sidebar";
 import { Header } from "./Header";
 
@@ -7,6 +7,7 @@ interface DashboardLayoutProps {
   title?: string;
   onAddProduct?: () => void;
   onSearch?: (value: string) => void;
+  onScanBarcode?: () => void;
 }
 
 export function DashboardLayout({
@@ -14,24 +15,27 @@ export function DashboardLayout({
   title,
   onAddProduct,
   onSearch,
+  onScanBarcode,
 }: DashboardLayoutProps) {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
   return (
     <div className="flex h-screen overflow-hidden bg-neutral-100">
-      {/* Sidebar */}
-      <Sidebar />
+      <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-      {/* Main Content */}
-      <div className="flex flex-1 flex-col overflow-hidden">
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <Header
           title={title}
+          onMenuClick={() => setSidebarOpen(true)}
           onAddProduct={onAddProduct}
           onSearch={onSearch}
+          onScanBarcode={onScanBarcode}
         />
 
-        <main className="flex-1 overflow-y-auto p-6">
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6">
           {children}
         </main>
- dual</div>
+      </div>
     </div>
   );
 }

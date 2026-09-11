@@ -99,7 +99,7 @@ useEffect(() => {
         />
 
         <Input
-          label="Stok"
+          label="Untuk berapa produk"
           type="number"
           placeholder="0"
           error={errors.stock?.message}
