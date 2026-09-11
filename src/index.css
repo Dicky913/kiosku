@@ -43,4 +43,9 @@
     @apply bg-neutral-100 text-neutral-900 antialiased;
     font-family: var(--font-sans);
   }
+  input,
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
 }
