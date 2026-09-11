@@ -42,7 +42,7 @@ export function ProductTable({
               <th className="px-6 py-3 font-medium text-neutral-600">Nama Produk</th>
               <th className="px-6 py-3 font-medium text-neutral-600">Harga</th>
               <th className="px-6 py-3 font-medium text-neutral-600">Barcode</th>
-              <th className="px-6 py-3 font-medium text-neutral-600">Stok</th>
+              <th className="px-6 py-3 font-medium text-neutral-600">Produk</th>
               <th className="px-6 py-3 text-right font-medium text-neutral-600">
                 Action
               </th>
@@ -109,7 +109,7 @@ export function ProductTable({
                   onClick={() => onEdit(product)}
                   className="rounded-lg p-2.5 text-neutral-500 hover:bg-neutral-100"
                 >
-                  <Pencil size={18} color="blue" />
+                  <Pencil size={18} color= "blue" />
                 </button>
                 <button
                   onClick={() => onDelete(product)}
